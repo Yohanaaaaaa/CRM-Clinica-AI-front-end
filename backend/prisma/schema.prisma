@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PipelineStatus {
+  novo_lead
+  agendado
+  confirmado
+  atendido
+  retorno
+  perdido
+}
+
+enum PatientSource {
+  ai_agent
+  whatsapp
+  manual
+}
+
+enum AppointmentStatus {
+  agendado
+  confirmado
+  cancelado
+  realizado
+  falta
+}
+
+enum TimelineEventType {
+  message
+  appointment
+  status_change
+  note
+  ai_action
+}
+
+model Patient {
+  id               String           @id @default(uuid())
+  name             String
+  phone            String
+  email            String?
+  cpf              String?          @unique
+  birthDate        DateTime?        @map("birth_date")
+  pipelineStatus   PipelineStatus   @default(novo_lead) @map("pipeline_status")
+  source           PatientSource    @default(manual)
+  professional     String?
+  notes            String?
+  createdAt        DateTime         @default(now()) @map("created_at")
+  lastInteraction  DateTime         @default(now()) @map("last_interaction")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  
+  appointments     Appointment[]
+  timelineEvents   TimelineEvent[]
+
+  @@index([pipelineStatus])
+  @@index([phone])
+  @@map("patients")
+}
+
+model Appointment {
+  id           String            @id @default(uuid())
+  patientId    String            @map("patient_id")
+  patient      Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  professional String
+  date         DateTime
+  time         String            // Store as HH:mm or use DateTime
+  duration     Int               @default(30)
+  status       AppointmentStatus @default(agendado)
+  type         String?
+  notes        String?
+  aiScheduled  Boolean           @default(false) @map("ai_scheduled")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@index([patientId])
+  @@map("appointments")
+}
+
+model TimelineEvent {
+  id          String            @id @default(uuid())
+  patientId   String            @map("patient_id")
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type        TimelineEventType
+  description String
+  aiGenerated Boolean           @default(false) @map("ai_generated")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  @@index([patientId])
+  @@index([createdAt])
+  @@map("timeline_events")
+}
+
+model Professional {
+  id        String   @id @default(uuid())
+  name      String
+  specialty String?
+  phone     String?
+  email     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("professionals")
+}
