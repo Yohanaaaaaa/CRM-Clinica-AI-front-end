@@ -46,6 +46,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
+import {
+  pipelineLabels,
+  type PipelineStatus as MockPipelineStatus,
+} from "@/lib/mock-data"
 
 const columnColors: Record<string, string> = {
   novo_lead: "border-t-chart-1",

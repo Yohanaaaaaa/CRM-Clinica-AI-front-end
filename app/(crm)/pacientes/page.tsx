@@ -1,6 +1,5 @@
 import { PatientTable } from "@/components/patients/patient-table"
 import { Button } from "@/components/ui/button"
-import { UserPlus, Bot } from "lucide-react"
 
 export default function PacientesPage() {
   return (
@@ -14,9 +13,6 @@ export default function PacientesPage() {
             Central de cadastro e historico completo de interacoes
           </p>
         </div>
-          </div>
-        </div>
-      </div>
       </div>
 
       <PatientTable />
